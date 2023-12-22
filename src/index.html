@@ -20,6 +20,8 @@
 
   <form id="formMessage">
 
+
+
     <label for="message">Messagem</label> <br>
     <input name="message" id="message" placeholder="Ex: Bom dia" required>
     <button>Enviar</button>
@@ -36,30 +38,44 @@
     const socket = io(api)
 
 
+    new Notification('olaaa')
 
 
     const email = document.querySelector('#email')
     const message = document.querySelector("#message")
     const messages = document.querySelector('#messages')
 
-    addEventListener('load', async () => {
-      // const test = await Notification.requestPermission()
-      // console.log(test)
-    })
-
-    socket.on('messageClient', payload => {
-      const item = document.createElement('li')
-      item.textContent = `${payload.email} => ${payload.message}`
-      messages.appendChild(item)   
+    window.addEventListener('load', async () => {
+      if(Notification.permission !== 'granted'){
+        Notification.requestPermission()
+      }
+      
     })
 
     document.querySelector('#formLogin').addEventListener('submit', async (event) => {
-
+      
       event.preventDefault()
 
-      const { data } = await axios.post('http://localhost:3000/login', { email: email.value })
+      const registration = await navigator.serviceWorker.register('service-worker.js')
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: 'BCg6o6kHYX411GzjUQW8OTRYdmHAivNzaE1ZmY90MxEAPZVCA5v5NVIKAzJ9XRDaRoFbY83stF-OteGE12tsszQ'
+      })
+
+      const subscriptionConvert = JSON.parse(JSON.stringify(subscription))
+
+      const payload = {
+        email: email.value,
+        endpoint: subscriptionConvert.endpoint,
+        p256dh: subscriptionConvert.keys.p256dh,
+        auth: subscriptionConvert.keys.auth
+      }
+
+      const { data } = await axios.post('http://localhost:3000/login', payload)
 
       console.log(data)
+      alert('Logado')
     })
 
     document.querySelector('#formMessage').addEventListener('submit', event => {
@@ -73,7 +89,12 @@
       message.value = ''
     })
 
-    
+    socket.on('messageClient', payload => {
+      const item = document.createElement('li')
+      item.textContent = `${payload.email} => ${payload.message}`
+      messages.appendChild(item)   
+    })
+
 
 
   </script>
