@@ -1,0 +1,10 @@
+{
+  "liveServer.settings.port": 5501,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  }
+
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notificação</title>
+
+</head>
+
+<body style="display: flex; flex-direction:column; gap: 1rem;">
+  <h1>Notificação</h1>
+
+  <form id="formLogin">
+
+    <label for="email">Email</label> <br>
+    <input type="email" name="email" id="email" placeholder="Ex: test@mail.com" required>
+    <button>Entrar</button>
+  </form>
+
+  <form id="formMessage">
+
+    <label for="message">Messagem</label> <br>
+    <input name="message" id="message" placeholder="Ex: Bom dia" required>
+    <button>Enviar</button>
+  </form>
+
+  <ul id="messages"></ul>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <script>
+
+    const api = location.host === '127.0.0.1:5501' ? 'http://localhost:3000' : 'https://outro-back.com'
+    const socket = io(api)
+
+
+
+
+    const email = document.querySelector('#email')
+    const message = document.querySelector("#message")
+    const messages = document.querySelector('#messages')
+
+    addEventListener('load', async () => {
+      // const test = await Notification.requestPermission()
+      // console.log(test)
+    })
+
+    socket.on('messageClient', payload => {
+      const item = document.createElement('li')
+      item.textContent = `${payload.email} => ${payload.message}`
+      messages.appendChild(item)   
+    })
+
+    document.querySelector('#formLogin').addEventListener('submit', async (event) => {
+
+      event.preventDefault()
+
+      const { data } = await axios.post('http://localhost:3000/login', { email: email.value })
+
+      console.log(data)
+    })
+
+    document.querySelector('#formMessage').addEventListener('submit', event => {
+      event.preventDefault()
+
+      const payload = {
+        email: email.value,
+        message: message.value
+      }
+      socket.emit('messageServer', payload)
+      message.value = ''
+    })
+
+    
+
+
+  </script>
+
+
+</body>
+
+</html>
